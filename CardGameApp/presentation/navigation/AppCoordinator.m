@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "AppCoordinator.h"
 #import "Coordinator.h"
-#import "BoardViewController.h"
+#import "BoardSceneBuilder.h"
 
 @interface AppCoordinator(Coordinator)
 
@@ -33,7 +33,6 @@
 }
 
 - (void) start {
-    BOOL hasSession = NO;
 //    [self setRoot:(hasSession ? AppDestinationBoard : AppDestinationSplash) animated:NO];
     [self setRoot:AppDestinationBoard animated:NO];
 }
@@ -70,7 +69,7 @@
 - (nullable UIViewController *)buildViewControllerForDestination:(AppDestination)destination {
     switch (destination) {
         case AppDestinationBoard: {
-            BoardViewController *viewController = [[BoardViewController alloc] init];
+            UIViewController *viewController = [[[BoardSceneBuilder alloc] init] build];
             return viewController;
         }
         default: {
