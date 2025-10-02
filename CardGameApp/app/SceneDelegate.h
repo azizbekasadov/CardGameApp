@@ -5,7 +5,7 @@
 //  Created by Azizbek Asadov on 02.10.2025.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 @interface SceneDelegate : UIResponder <UIWindowSceneDelegate>
 

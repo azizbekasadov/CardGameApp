@@ -5,15 +5,9 @@
 //  Created by Azizbek Asadov on 02.10.2025.
 //
 
-#import <UIKit/UIKit.h>
-#import <CoreData/CoreData.h>
+@import UIKit;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
-
-@property (readonly, strong) NSPersistentContainer *persistentContainer;
-
-- (void)saveContext;
-
 
 @end
 
