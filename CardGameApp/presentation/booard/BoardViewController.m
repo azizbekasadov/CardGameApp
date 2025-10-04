@@ -7,21 +7,38 @@
 
 #import "Deck.h"
 #import "PlayingCardDeck.h"
+#import "CardMatchingGame.h"
 #import "BoardViewController.h"
 
 
 @interface BoardViewController()
 
+#pragma mark: - UI components
+
 @property (strong, nonatomic) UILabel *flipsLabel;
 @property (strong, nonatomic) UIButton *cardButton;
+
+#pragma mark: - Properties
+
 @property (nonatomic) int flipCount;
 @property (strong, nonatomic) Deck* deck;
+@property (strong, nonatomic) CardMatchingGame* cardMatchingGameEngine;
 
 @end
 
 @implementation BoardViewController
 
-// lazy instantiation
+#pragma mark: - Lazy Properties
+
+- (CardMatchingGame *) cardMatchingGameEngine {
+    if (_cardMatchingGameEngine) {
+        _cardMatchingGameEngine = [[CardMatchingGame alloc] initWithCardCount:0 usingDeck: [self createDeck]];
+    }
+    
+    return _cardMatchingGameEngine;
+}
+
+
 - (Deck*) deck {
     if (!_deck) {
         _deck = [self createDeck];
@@ -63,6 +80,8 @@
     
     return _cardButton;
 }
+
+#pragma mark: - Methods
 
 - (void) handleTouchCardButton: (UIButton *) sender {
     if ([sender.currentTitle length]) {
