@@ -21,5 +21,7 @@
 - (Card *) cardAtIndex: (NSUInteger) index;
 
 @property (nonatomic, readonly) NSInteger score;
+@property (nonatomic, readonly) NSUInteger flipCount;
+@property (nonatomic, readonly) NSUInteger cardsCount;
 
 @end

@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
     return score;
 }
 
-- (int) matchCards:(NSArray<Card *> *)otherCards {
+- (int) matchCards:(NSArray *) otherCards {
     int score = 0;
     
     for (Card* card in otherCards) {

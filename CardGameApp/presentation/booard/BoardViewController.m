@@ -6,17 +6,20 @@
 //
 
 #import "Deck.h"
+#import "CardViewCell.h"
 #import "PlayingCardDeck.h"
 #import "CardMatchingGame.h"
 #import "BoardViewController.h"
 
+static NSString * const kCellId = @"CardViewCell";
 
-@interface BoardViewController()
+@interface BoardViewController() <UICollectionViewDelegateFlowLayout, UICollectionViewDataSource>
 
 #pragma mark: - UI components
 
 @property (strong, nonatomic) UILabel *flipsLabel;
-@property (strong, nonatomic) UIButton *cardButton;
+@property (strong, nonatomic) UILabel *scoreLabel;
+@property (strong, nonatomic) UICollectionView *collectionView;
 
 #pragma mark: - Properties
 
@@ -28,11 +31,17 @@
 
 @implementation BoardViewController
 
+static NSUInteger const cardCount = 12;
+
+@synthesize flipsLabel = _flipsLabel;
+@synthesize collectionView = _collectionView;
+
 #pragma mark: - Lazy Properties
 
 - (CardMatchingGame *) cardMatchingGameEngine {
-    if (_cardMatchingGameEngine) {
-        _cardMatchingGameEngine = [[CardMatchingGame alloc] initWithCardCount:0 usingDeck: [self createDeck]];
+    if (!_cardMatchingGameEngine) {
+        _cardMatchingGameEngine = [[CardMatchingGame alloc] initWithCardCount:cardCount
+                                                                    usingDeck: [self createDeck]];
     }
     
     return _cardMatchingGameEngine;
@@ -47,17 +56,10 @@
     return _deck;
 }
 
-- (Deck*) createDeck {
-    return [[PlayingCardDeck alloc] init];
-}
-
-@synthesize flipsLabel = _flipsLabel;
-@synthesize cardButton = _cardButton;
-
 - (UILabel *) flipsLabel {
     if (!_flipsLabel) {
         _flipsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        _flipsLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        [_flipsLabel setTranslatesAutoresizingMaskIntoConstraints: NO];
         [_flipsLabel setFont:[UIFont systemFontOfSize: 14 weight:UIFontWeightMedium]];
         [_flipsLabel setTextColor:UIColor.whiteColor];
         [_flipsLabel setText:@"Flips: 0"];
@@ -66,42 +68,44 @@
     return _flipsLabel;
 }
 
-- (UIButton *) cardButton {
-    if (!_cardButton) {
-        _cardButton = [[UIButton alloc] initWithFrame:CGRectZero];
-        _cardButton.translatesAutoresizingMaskIntoConstraints = NO;
-        [_cardButton setTitleColor:UIColor.blackColor forState:UIControlStateNormal];
-        [_cardButton setBackgroundImage:[UIImage imageNamed:@"Card/backside"] forState:UIControlStateNormal];
-        [_cardButton setTitle:@"" forState:UIControlStateNormal];
-        [_cardButton addTarget:self
-                        action:@selector(handleTouchCardButton:)
-              forControlEvents:UIControlEventTouchUpInside];
+- (UILabel *) scoreLabel {
+    if (!_scoreLabel) {
+        _scoreLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        [_scoreLabel setTranslatesAutoresizingMaskIntoConstraints: NO];
+        [_scoreLabel setFont:[UIFont systemFontOfSize: 14 weight:UIFontWeightMedium]];
+        [_scoreLabel setTextColor:UIColor.whiteColor];
+        [_scoreLabel setText:@"Score: 0"];
     }
     
-    return _cardButton;
+    return _scoreLabel;
+}
+
+- (UICollectionView *) collectionView {
+    if (!_collectionView) {
+        UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+        layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+        layout.minimumInteritemSpacing = 10.0;
+        layout.minimumLineSpacing = 12.0;
+        layout.sectionInset = UIEdgeInsetsMake(16, 16, 16, 16);
+        
+        _collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+        [_collectionView registerClass:CardViewCell.class forCellWithReuseIdentifier:kCellId];
+        [_collectionView setTranslatesAutoresizingMaskIntoConstraints: NO];
+        [_collectionView setBackgroundColor:UIColor.clearColor];
+        _collectionView.alwaysBounceVertical = YES;
+        _collectionView.delegate = self;
+        _collectionView.dataSource = self;
+    }
+    
+    return _collectionView;
+}
+
+
+- (Deck*) createDeck {
+    return [[PlayingCardDeck alloc] init];
 }
 
 #pragma mark: - Methods
-
-- (void) handleTouchCardButton: (UIButton *) sender {
-    if ([sender.currentTitle length]) {
-        [sender setBackgroundImage:[UIImage imageNamed: @"Card/backside"] forState:UIControlStateNormal];
-        [sender setTitle:@"" forState:UIControlStateNormal];
-    } else {
-        Card *card = [self.deck drawRandomCard];
-        
-        if (card) {
-            [sender setBackgroundImage:[UIImage imageNamed: @"Card/frontside"] forState:UIControlStateNormal];
-            [sender setTitle:@"A♥︎" forState:UIControlStateNormal];
-        }
-    }
-    
-    self.flipCount++;
-}
-
-- (void) setCardButton:(UIButton *) cardButton {
-    _cardButton = cardButton;
-}
 
 - (void) setFlipsLabel: (UILabel *) flipsLabel {
     _flipsLabel = flipsLabel;
@@ -119,22 +123,40 @@
     [self rootViewStylization];
     [self setupNavigationBarItemsProperties];
     [self setupSubViews];
+    [self updateUI];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [self updateUI];
 }
 
 - (void) setupSubViews {
     [self.view addSubview:self.flipsLabel];
-    [self.view addSubview:self.cardButton];
+    [self.view addSubview:self.scoreLabel];
+    [self.view addSubview:self.collectionView];
     
     NSArray* flipsLabelConstraints = @[
-        [self.flipsLabel.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-24],
+        [self.flipsLabel.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-6],
         [self.flipsLabel.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
-        [self.cardButton.centerYAnchor constraintEqualToAnchor:self.view.layoutMarginsGuide.centerYAnchor],
-        [self.cardButton.centerXAnchor constraintEqualToAnchor:self.view.layoutMarginsGuide.centerXAnchor],
-        [self.cardButton.widthAnchor constraintEqualToConstant:80],
-        [self.cardButton.heightAnchor constraintEqualToConstant:120],
     ];
     
     [NSLayoutConstraint activateConstraints:flipsLabelConstraints];
+    
+    NSArray* scoreLabelConstraints = @[
+        [self.scoreLabel.bottomAnchor constraintEqualToAnchor:self.flipsLabel.topAnchor constant:-10],
+        [self.scoreLabel.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+    ];
+    
+    [NSLayoutConstraint activateConstraints:scoreLabelConstraints];
+    
+    NSArray* collectionViewConstaints = @[
+        [self.collectionView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+        [self.collectionView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [self.collectionView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [self.collectionView.bottomAnchor constraintEqualToAnchor:self.scoreLabel.topAnchor constant:-10],
+    ];
+    
+    [NSLayoutConstraint activateConstraints:collectionViewConstaints];
 }
 
 - (void) handleCardPressed: (UIButton *) sender {
@@ -149,8 +171,18 @@
     self.flipCount++;
 }
 
-- (void) generateCardButtons {
+- (void) updateUI {
+    [self.collectionView reloadData];
     
+    self.flipsLabel.text = [NSString stringWithFormat:@"Flips: %ld", self.cardMatchingGameEngine.flipCount];
+    self.scoreLabel.text = [NSString stringWithFormat:@"Score: %ld", self.cardMatchingGameEngine.score];
+}
+
+- (void) updateUIForGivenIndices: (NSArray<NSIndexPath *>*) indexPaths {
+    [self.collectionView reloadItemsAtIndexPaths:indexPaths];
+    
+    self.flipsLabel.text = [NSString stringWithFormat:@"Flips: %ld", self.cardMatchingGameEngine.flipCount];
+    self.scoreLabel.text = [NSString stringWithFormat:@"Score: %ld", self.cardMatchingGameEngine.score];
 }
 
 - (void) rootViewStylization {
@@ -168,6 +200,48 @@
     self.navigationController.navigationBar.largeTitleTextAttributes = @{
         NSForegroundColorAttributeName : UIColor.whiteColor
     };
+}
+
+#pragma mark - UICollectionViewDataSource
+
+- (NSInteger) collectionView:(UICollectionView *) collectionView
+      numberOfItemsInSection:(NSInteger)section {
+    return self.cardMatchingGameEngine.cardsCount;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *) collectionView
+                  cellForItemAtIndexPath:(NSIndexPath *) indexPath {
+    CardViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCellId forIndexPath:indexPath];
+    
+    if (cell) {
+        Card *card = [self.cardMatchingGameEngine cardAtIndex:indexPath.item];
+        
+        [cell setCardCellData:card];
+    }
+    
+    return cell;
+}
+
+#pragma mark - UICollectionViewDelegateFlowLayout
+
+- (CGSize)collectionView:(UICollectionView *)collectionView
+                  layout:(UICollectionViewLayout *)collectionViewLayout
+  sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)collectionViewLayout;
+    UIEdgeInsets inset = layout.sectionInset;
+    CGFloat inter = layout.minimumInteritemSpacing;
+    CGFloat available = collectionView.bounds.size.width - inset.left - inset.right - (2 * inter);
+    
+    CGFloat width = floor(available / 3.0);
+    CGFloat height = width * 1.4;
+    
+    return CGSizeMake(width, height);
+}
+
+- (void)collectionView:(UICollectionView *) collectionView
+        didSelectItemAtIndexPath:(NSIndexPath *) indexPath {
+    [self.cardMatchingGameEngine chooseCardAtIndex:indexPath.item];
+    [self updateUI];
 }
 
 @end

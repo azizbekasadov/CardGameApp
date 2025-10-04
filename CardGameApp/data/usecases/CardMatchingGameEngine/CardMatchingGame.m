@@ -13,8 +13,10 @@
 
 @interface CardMatchingGame()
 
+@property (nonatomic, readwrite) NSUInteger flipCount;
+@property (nonatomic, readwrite) NSUInteger cardsCount;
 @property (nonatomic, readwrite) NSInteger score; // readwrite only when we redefine readonly in private scope
-@property (nonatomic, strong) NSMutableArray<Card *>* cards;
+@property (nonatomic, strong) NSMutableArray* cards;
 
 @end
 
@@ -22,7 +24,7 @@
 
 // lazy instantiation
 
-- (NSMutableArray<Card*>*) cards {
+- (NSMutableArray*) cards {
     if (!_cards) {
         _cards = [[NSMutableArray alloc] init];
     }
@@ -37,7 +39,7 @@ static const int MATCH_BONUS = 4;
 static const int COST_TO_CHOOSE = 2;
 
 - (instancetype) initWithCardCount: (NSUInteger) count
-                         usingDeck:(Deck *) deck {
+                         usingDeck: (Deck *) deck {
     self = [super init];
     
     if (self) {
@@ -51,6 +53,9 @@ static const int COST_TO_CHOOSE = 2;
                 break;
             }
         }
+        
+        self.cardsCount = count;
+        self.flipCount = 0;
     }
     
     return self;
@@ -85,6 +90,8 @@ static const int COST_TO_CHOOSE = 2;
             card.chosen = YES;
         }
     }
+    
+    self.flipCount++;
 }
 
 - (Card *)cardAtIndex:(NSUInteger) index {
