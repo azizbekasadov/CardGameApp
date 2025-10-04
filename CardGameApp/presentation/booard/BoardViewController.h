@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "UIColorFromRGB.h"
 
+@class Deck;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface BoardViewController : UIViewController
