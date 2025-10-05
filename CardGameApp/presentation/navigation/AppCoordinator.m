@@ -79,4 +79,9 @@
     }
 }
 
+- (void)dealloc {
+    _navigationController = nil;
+    _window = nil;
+}
+
 @end
