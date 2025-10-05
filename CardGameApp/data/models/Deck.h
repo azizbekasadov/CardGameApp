@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) addCard: (Card*) card atTop: (BOOL) atTop;
 - (void) addCard: (Card*) card;
 
-- (Card*) drawRandomCard;
+- (Card*) drawRandomCard DEPRECATED_MSG_ATTRIBUTE("Use -playWithError: instead.") ;
 
 @end
 

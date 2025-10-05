@@ -38,7 +38,8 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
-- (Card *) drawRandomCard {
+
+- (Card *) drawRandomCard DEPRECATED_MSG_ATTRIBUTE("Use -playWithError: instead.") {
     Card *randomCard = nil;
     
     if ([self.cards count]) {
