@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "AppCoordinator.h"
 #import "Coordinator.h"
-#import "BoardSceneBuilder.h"
+#import "PlayingCardGameSceneBuilder.h"
 
 @interface AppCoordinator(Coordinator)
 
@@ -69,7 +69,7 @@
 - (nullable UIViewController *)buildViewControllerForDestination:(AppDestination)destination {
     switch (destination) {
         case AppDestinationBoard: {
-            UIViewController *viewController = [[[BoardSceneBuilder alloc] init] build];
+            UIViewController *viewController = [[[PlayingCardGameSceneBuilder alloc] init] build];
             return viewController;
         }
         default: {
